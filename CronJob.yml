@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: sync-fedora-repo
+spec:
+  schedule: "0 0 * * 0" # Run every Sunday at midnight
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: sync-fedora-repo
+            image: ghcr.io/stephenl03/sync-fedora-repo:latest
+            command: [ "python", "./sync_fedora_repo.py" ]
+            volumeMounts:
+            - name: repo-volume
+              mountPath: /mnt/storage-x/repo_mirror/fedora/
+          restartPolicy: OnFailure
+          volumes:
+          - name: repo-volume
+            hostPath:
+              path: /mnt/storage-x/repo_mirror/fedora/
