@@ -42,7 +42,7 @@ for release in [latest_release, prev_release]:
     subprocess.run(
         [
             "rsync",
-            "-amHR",
+            "-amH",
             "--timeout=300",
             "--exclude='drpms'",
             "--exclude='debug'",
