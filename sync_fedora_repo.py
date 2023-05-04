@@ -21,6 +21,33 @@ RELEASE_PATTERN = f"Fedora Server ([0-9]+)"
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
+
+def sync_path(path, source, excludes=None):
+    if not os.path.exists(path):
+        logger.info(f"{path=} does not exist, creating...")
+        os.makedirs(path)
+    logger.info(f"Cloning {source} to {path}")
+    command = [
+        "rsync",
+        "-amH",
+        "--timeout=300",
+        "--delete-after",
+    ]
+    if excludes:
+        for ex in excludes:
+            command.append(f"--exclude={ex}")
+    command.extend(
+        [
+            f"rsync://{MIRROR}/fedora/linux/{source}",
+            path,
+        ]
+    )
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error occurred while syncing {source} to {path}: {e}")
+
+
 try:
     # Get the latest Fedora Server release number from the website
     with urllib.request.urlopen(RELEASES_URL) as response:
@@ -76,29 +103,3 @@ try:
 
 except Exception as e:
     logger.exception(f"Error occurred: {e}")
-
-
-def sync_path(path, source, excludes=None):
-    if not os.path.exists(path):
-        logger.info(f"{path=} does not exist, creating...")
-        os.makedirs(path)
-    logger.info(f"Cloning {source} to {path}")
-    command = [
-        "rsync",
-        "-amH",
-        "--timeout=300",
-        "--delete-after",
-    ]
-    if excludes:
-        for ex in excludes:
-            command.append(f"--exclude={ex}")
-    command.extend(
-        [
-            f"rsync://{MIRROR}/fedora/linux/{source}",
-            path,
-        ]
-    )
-    try:
-        subprocess.run(command, check=True)
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Error occurred while syncing {source} to {path}: {e}")
