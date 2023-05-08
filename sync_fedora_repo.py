@@ -56,45 +56,33 @@ try:
         latest_release = int(match.group(1))
 
     # Calculate the paths for the latest release and the previous release
-    # I don't want the absolute latest, so I will use n - 1 for my latest
+    # I don't want the absolute latest, so I will use `latest - 1` for my latest
     latest_release = latest_release - 1
     prev_release = latest_release - 1
     logger.info(f"Latest release: {latest_release}")
 
     repo = {
-        "latest_release": {
-            "version": latest_release,
-            "release_path": os.path.join(
-                REPO_MIRROR_PATH, f"releases/{latest_release}"
-            ),
-            "update_path": os.path.join(REPO_MIRROR_PATH, f"updates/{latest_release}"),
-        },
-        "prev_release": {
-            "version": prev_release,
-            "release_path": os.path.join(REPO_MIRROR_PATH, f"releases/{prev_release}"),
-            "update_path": os.path.join(REPO_MIRROR_PATH, f"updates/{prev_release}"),
-        },
+        "latest_release": latest_release,
+        "prev_release": prev_release,
     }
 
     # Sync the updates for the latest two releases
-    for _, v in repo.items():
+    for release in repo.items():
         sync_path(
-            path=v["release_path"],
-            source=f"releases/{v['version']}/Everything/x86_64/os/",
+            path=os.path.join(REPO_MIRROR_PATH, f"releases/{release}/Everything/x86_64/os/"),
+            source=f"releases/{release}/Everything/x86_64/os/",
             excludes=["debug"],
         )
         sync_path(
-            path=v["update_path"],
-            source=f"updates/{v['version']}/Everything/x86_64/",
+            path=os.path.join(REPO_MIRROR_PATH, f"updates/{release}/Everything/x86_64/"),
+            source=f"updates/{release}/Everything/x86_64/",
             excludes=["drpms", "debug"],
         )
 
     # Remove the synced release and updates for the oldest synced release if there are more than two releases
     oldest_synced = latest_release - 2
     if oldest_synced >= 0:
-        oldest_release_path = os.path.join(
-            REPO_MIRROR_PATH, f"releases/{oldest_synced}"
-        )
+        oldest_release_path = os.path.join(REPO_MIRROR_PATH, f"releases/{oldest_synced}")
         oldest_updates_path = os.path.join(REPO_MIRROR_PATH, f"updates/{oldest_synced}")
         for location in [oldest_release_path, oldest_updates_path]:
             if os.path.exists(location):
