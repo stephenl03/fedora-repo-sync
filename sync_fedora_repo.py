@@ -31,7 +31,6 @@ def sync_path(path, source, excludes=None):
         "rsync",
         "-amH",
         "--timeout=300",
-        "--delete-after",
     ]
     if excludes:
         for ex in excludes:
