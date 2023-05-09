@@ -61,13 +61,13 @@ try:
     prev_release = latest_release - 1
     logger.info(f"Latest release: {latest_release}")
 
-    repo = {
+    repos = {
         "latest_release": latest_release,
         "prev_release": prev_release,
     }
 
     # Sync the updates for the latest two releases
-    for release in repo.items():
+    for _, release in repos.items():
         sync_path(
             path=os.path.join(REPO_MIRROR_PATH, f"releases/{release}/Everything/x86_64/os/"),
             source=f"releases/{release}/Everything/x86_64/os/",
